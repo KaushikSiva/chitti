@@ -1,0 +1,5 @@
+flask
+streamlit
+crawl4ai
+groq
+supabase
