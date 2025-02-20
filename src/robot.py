@@ -21,6 +21,24 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 GROQ_URL = "https://api.groq.com/v1/chat/completions"
 
 
+N8N_WEBHOOK_URL = os.getenv("N8N_URL")
+
+def send_to_n8n(jokes, email):
+    # Prepare the payload to send to n8n
+    payload = {
+        "jokes": jokes,
+        "email": email
+    }
+
+    # Send a POST request to the n8n webhook
+    response = requests.post(N8N_WEBHOOK_URL, json=payload)
+    
+    if response.status_code == 200:
+        print("Successfully sent to n8n")
+    else:
+        print(f"Error sending to n8n: {response.status_code}")
+
+
 def get_jokes():
     payload = {
         "model": "groq-llm",
@@ -60,7 +78,9 @@ def whatsapp_webhook():
                 if "send an email to" in message:
                     email = message.split("send an email to")[-1].strip()
                     jokes = get_jokes()
-                    return jsonify({"email": email, "jokes": jokes})
+                    send_to_n8n(jokes, email)
+                    # Respond to WhatsApp message
+                    send_whatsapp_message(sender, "Sending your jokes via email!")
 
                 # Send a response back to WhatsApp
                 send_whatsapp_message(sender, "I only understand 'send an email to XYZ'")
