@@ -10,11 +10,10 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SUPABASE_KEY_2 = os.getenv("SUPABASE_KEY_2")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_URL = os.getenv("GROQ_URL")
-
 HF_API_KEY = os.getenv("HF_API_KEY")
 WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
-
+VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 # Supabase Config
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -31,23 +30,46 @@ def get_jokes():
     response = requests.post(GROQ_URL, json=payload, headers=headers)
     return response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
 
-@app.route("/webhook", methods=["POST"])
+
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+
+@app.route("/webhook", methods=["GET", "POST"])
 def whatsapp_webhook():
-    data = request.json
-    if "messages" in data["entry"][0]["changes"][0]["value"]:
-        message = data["entry"][0]["changes"][0]["value"]["messages"][0]["text"]["body"]
-        sender = data["entry"][0]["changes"][0]["value"]["messages"][0]["from"]
+    if request.method == "GET":
+        # WhatsApp webhook verification
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
 
-        # Process message
-        if "send an email to" in message:
-            email = message.split("send an email to")[-1].strip()
-            jokes = get_jokes()
-            return jsonify({"email": email, "jokes": jokes})
-        
-        # Respond to WhatsApp message
-        send_whatsapp_message(sender, "I only understand 'send an email to XYZ'")
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            return challenge, 200  # Return the challenge token as required
+        return "Forbidden", 403
 
-    return jsonify({"status": "ok"})
+    elif request.method == "POST":
+        # WhatsApp message processing
+        data = request.json
+
+        try:
+            message_data = data["entry"][0]["changes"][0]["value"]
+            if "messages" in message_data:
+                message = message_data["messages"][0]["text"]["body"]
+                sender = message_data["messages"][0]["from"]
+                if "send an email to" in message:
+                    email = message.split("send an email to")[-1].strip()
+                    jokes = get_jokes()
+                    return jsonify({"email": email, "jokes": jokes})
+
+                # Send a response back to WhatsApp
+                send_whatsapp_message(sender, "I only understand 'send an email to XYZ'")
+
+        except KeyError:
+            return jsonify({"error": "Invalid message format"}), 400
+
+    return jsonify({"status": "ok"}), 200
+
 
 def send_whatsapp_message(to, message):
     print("hello")
