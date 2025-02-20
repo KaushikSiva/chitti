@@ -10,15 +10,13 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SUPABASE_KEY_2 = os.getenv("SUPABASE_KEY_2")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_URL = os.getenv("GROQ_URL")
+GROQ_MODEL = os.getenv("GROQ_MODEL")
 HF_API_KEY = os.getenv("HF_API_KEY")
 WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 # Supabase Config
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# Groq Config
-GROQ_URL = "https://api.groq.com/v1/chat/completions"
 
 
 N8N_WEBHOOK_URL = os.getenv("N8N_URL")
@@ -41,7 +39,7 @@ def send_to_n8n(jokes, email):
 
 def get_jokes():
     payload = {
-        "model": "groq-llm",
+        "model": GROQ_MODEL,
         "messages": [{"role": "user", "content": "Tell me 5 jokes"}]
     }
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
