@@ -36,7 +36,7 @@ def send_to_n8n(jokes, email):
     if response.status_code == 200:
         print("Successfully sent to n8n")
     else:
-        print(f"Error sending to n8n: {response.status_code}")
+        print(f"Error sending to n8n: {N8N_WEBHOOK_URL},{response.status_code}")
 
 
 def get_jokes():
