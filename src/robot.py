@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import requests
 import os
 from supabase import create_client, Client
-
 app = Flask(__name__)
 # Load environment variables
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -18,13 +17,11 @@ VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 # Supabase Config
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
 N8N_WEBHOOK_URL = os.getenv("N8N_URL")
 
-def send_to_n8n(jokes, email):
+def send_to_n8n(email):
     # Prepare the payload to send to n8n
     payload = {
-        "jokes": jokes,
         "email": email
     }
 
@@ -75,13 +72,20 @@ def whatsapp_webhook():
                 sender = message_data["messages"][0]["from"]
                 if "send an email to" in message:
                     email = message.split("send an email to")[-1].strip()
-                    jokes = get_jokes()
-                    send_to_n8n(jokes, email)
+                    send_to_n8n(email)
                     # Respond to WhatsApp message
-                    send_whatsapp_message(sender, "Sending your jokes via email!")
+                    send_whatsapp_message(sender, "Sending your news via email!")
+            elif "prompt" in data:
+                # code here
+                prompt = data["prompt"]  # Retrieve the prompt variable
+                if "send an email to" in message:
+                    email = message.split("send an email to")[-1].strip()
+                    send_to_n8n(email)
+                # Handle the prompt (e.g., fetch news or perform actions based on the prompt)
+                send_whatsapp_message(sender, f"Received the prompt: {prompt}. Sending your news!")
 
-                # Send a response back to WhatsApp
-                send_whatsapp_message(sender, "I only understand 'send an email to XYZ'")
+            # Send a response back to WhatsApp
+            send_whatsapp_message(sender, "I only understand 'send an email to XYZ'")
 
         except KeyError:
             return jsonify({"error": "Invalid message format"}), 400
