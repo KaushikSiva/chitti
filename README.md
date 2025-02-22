@@ -51,5 +51,5 @@ Additionally, the system uses the DeepSeek model for ranking and news message ge
    For a demonstration of how this system works, check out the video recording:
 
 ## Video Recording
-   https://youtu.be/GdLrG5Vbanc
+[![VIDEO](https://img.youtube.com/vi/GdLrG5Vbanc/0.jpg)](https://www.youtube.com/watch?v=GdLrG5Vbanc)
 
