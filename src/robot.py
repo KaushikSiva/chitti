@@ -34,16 +34,6 @@ def send_to_n8n(email):
         print(f"Error sending to n8n: {N8N_WEBHOOK_URL},{response.status_code}")
 
 
-def get_jokes():
-    payload = {
-        "model": GROQ_MODEL,
-        "messages": [{"role": "user", "content": "Tell me 5 jokes"}]
-    }
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
-    response = requests.post(GROQ_URL, json=payload, headers=headers)
-    return response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
-
-
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
