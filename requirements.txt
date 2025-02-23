@@ -5,3 +5,7 @@ requests==2.32.3
 urllib3==2.3.0
 flask
 gunicorn
+supabase
+streamlit
+crawl4ai
+groq
